@@ -1,0 +1,18 @@
+{
+	/***
+	* class info file 
+	***/
+	"class": "classes.txt",
+	/****
+	* HISTOGRAM OF ORIENTED GRADIENTS DESCRIPTOR
+	****/
+	"orientations": 9,
+	"pixels_per_cell": [4, 4],
+	"cells_per_block": [2, 2],
+	"transform_sqrt": 1,
+	"normalize": "L2",
+
+	/* SVC parameters */
+	"classifier_path": "output/model_OSD_icon.cpickle",
+	"C": 0.01
+}
