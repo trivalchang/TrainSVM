@@ -48,10 +48,12 @@ def main():
 	featureList = []
 
 	fileName = []
-	for f in os.listdir(args['positive']):
-		fileName.append(args['positive']+'/'+f)
-	for f in os.listdir(args['negative']):
-		fileName.append(args['negative']+'/'+f)
+	if (args['positive'] != None):
+		for f in os.listdir(args['positive']):
+			fileName.append(args['positive']+'/'+f)
+	if (args['negative'] != None):
+		for f in os.listdir(args['negative']):
+			fileName.append(args['negative']+'/'+f)
 
 	for fpath in fileName:
 		print('file {}'.format(fpath))

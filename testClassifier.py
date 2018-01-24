@@ -44,20 +44,29 @@ def main():
 
 	model = pickle.loads(open(conf["classifier_path"], "rb").read())
 
-	xmlName = args['test']
-	voc = pacasl_voc_reader(xmlName)
+	fileList = []
+	for f in os.listdir(args['test']):
+		if f.endswith(".xml") == False:
+			continue
+		fileList.append(args['test']+'/'+f)
 
-	imgName = xmlName.replace('.xml', '.png')
-	img = cv2.imread(imgName)
-	img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+	for xmlName in fileList:
+		voc = pacasl_voc_reader(xmlName)
 
-	objectList = voc.getObjectList()
-	for (className, (xmin, ymin, xmax, ymax)) in objectList:
-		roi = img[ymin:ymax+1, xmin:xmax+1]
-		(feature, _) = hog.describe(roi)
+		imgName = xmlName.replace('.xml', '.png')
+		img = cv2.imread(imgName)
+		img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-		idx = model.predict([feature])
-		realIdx = classInfo.index(className) if className != '__distract' else -1
-		print('predict = {}, real = {}'.format(idx, realIdx))
+		objectList = voc.getObjectList()
+		print('classify {}'.format(imgName))
+		for (className, (xmin, ymin, xmax, ymax)) in objectList:
+			roi = img[ymin:ymax+1, xmin:xmax+1]
+			(feature, _) = hog.describe(roi)
+
+			predictIdx = model.predict([feature])
+			realIdx = classInfo.index(className) if className != '__distract' else -1
+			#print('predict = {}, real = {}'.format(idx, realIdx))
+			if realIdx != predictIdx:
+				print('		predict error: {} - {}, real {} predict {}'.format(imgName, (xmin, ymin, xmax, ymax), realIdx, predictIdx))
 
 main()
