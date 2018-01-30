@@ -17,7 +17,7 @@ from fileOp.imgReader import ImageReader
 from fileOp.conf import Conf
 from annotation.pascal_voc import pacasl_voc_reader
 from feature.HOG import HOG
-from fileOp.h5_dataset import h5_load_dataset
+from fileOp.h5_dataset import h5_dump_dataset, h5_load_dataset
 
 classInfo = []
 
@@ -26,7 +26,9 @@ def main():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-c", "--conf", required=True,  help="json file configuration")
 	ap.add_argument("-p", "--path", required=True, help="path of the dataset")
+	ap.add_argument("-o", "--output", required=True, help="path of the output feature file")
 	ap.add_argument("-d", "--dataset", required=True, help="name of the dataset")
+	ap.add_argument("-a", "--append", default=False, action='store_true', required=False, help="name of the dataset")
 
 	args = vars(ap.parse_args())
 
@@ -45,13 +47,40 @@ def main():
 	normalize = str(conf['normalize'])
 
 	hog = HOG(orientation, pixels_per_cell, cells_per_block, transform_sqrt, normalize)
-	(featureList, labels) = h5_load_dataset(args['path'], args['dataset'])
+	labels = []
+	featureList = []
 
-	model = SVC(kernel="linear", C=conf["C"], probability=True, random_state=42)
-	model.fit(featureList, labels)
+	fileList = []
+	if (args['path'] != None):	
+		for f in os.listdir(args['path']):
+			if f.endswith(".xml") == False:
+				continue
+			fileList.append(args['path']+'/'+f)
 
-	f = open(conf["classifier_path"], "wb")
-	f.write(pickle.dumps(model))
-	f.close()
+	for fpath in fileList:
+		print('file {}'.format(fpath))
+		if fpath.endswith(".xml") == False:
+			continue
+		voc = pacasl_voc_reader(fpath)
+		imgName = fpath.replace('.xml', '.png')
+		objectList = voc.getObjectList()
+		img = cv2.imread(imgName)
+		img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+		for (className, (xmin, ymin, xmax, ymax)) in objectList:
+			roi = img[ymin:ymax+1, xmin:xmax+1]
+			if (className == '__distract'):
+				labels.append(-1)
+			else:	
+				labels.append(classInfo.index(className))
+			(feature, _) = hog.describe(roi)
+			featureList.append(feature)
+
+		break
+	print('write {} feature'.format(len(labels)))
+	h5_dump_dataset(featureList, 
+						labels, 
+						'./output/icon_featur.hdf5', 
+						args['dataset'], 
+						'a' if args['append']==True else 'w')
 
 main()
