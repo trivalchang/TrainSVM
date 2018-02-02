@@ -27,6 +27,8 @@ def main():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-c", "--conf", required=True, help="json file configuration")
 	ap.add_argument("-t", "--test", required=True, help="path of the test image")
+	ap.add_argument("-l", "--label", required=True, help="class label index to classify")
+	ap.add_argument("-n", "--hard", default=False, action='store_true', required=False, help="write hard negative")
 
 	args = vars(ap.parse_args())
 
@@ -44,7 +46,8 @@ def main():
 
 	hog = HOG(orientation, pixels_per_cell, cells_per_block, transform_sqrt, normalize)
 
-	model = pickle.loads(open(conf["classifier_path"], "rb").read())
+	classIdx = classInfo.index(args['label'])
+	model = pickle.loads(open(conf['classifier'+str(classIdx)+'_path'], "rb").read())
 
 	fileList = []
 	for f in os.listdir(args['test']):
@@ -55,6 +58,7 @@ def main():
 	negativeFeatureList = []
 	negativeLabels = []
 	error_predict_cnt = 0
+	total_predict_cnt = 0
 	for xmlName in fileList:
 		voc = pacasl_voc_reader(xmlName)
 
@@ -63,29 +67,30 @@ def main():
 		img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 		objectList = voc.getObjectList()
-		print('classify {}'.format(imgName))
+		#print('classify {}'.format(imgName))
 		for (className, (xmin, ymin, xmax, ymax)) in objectList:
 			roi = img[ymin:ymax+1, xmin:xmax+1]
 			(feature, _) = hog.describe(roi)
 
 			predictIdx = model.predict([feature])
-			realIdx = classInfo.index(className) if className != '__distract' else -1
-			#print('predict = {}, real = {}'.format(idx, realIdx))
+
+			realIdx = 0 if className != '__distract' and classIdx == classInfo.index(className) else -1
+			
+			#print('predict = {}, real = {}'.format(predictIdx, realIdx))
 			if realIdx != predictIdx:
-				print('		predict error: {} - {}, real {} predict {}'.format(imgName, (xmin, ymin, xmax, ymax), realIdx, predictIdx))
+				#print('		predict error: {} - {}, real {} predict {}'.format(imgName, (xmin, ymin, xmax, ymax), realIdx, predictIdx))
 				error_predict_cnt = error_predict_cnt + 1
 				if realIdx == -1:
 					negativeFeatureList.append(feature)
 					negativeLabels.append(-1)
-					print('			write hard negative')
-
+			total_predict_cnt = total_predict_cnt + 1
+	
 	print('===========================')
-	print('{} errors '.format(error_predict_cnt))
-	print('write {} hard negative feature'.format(len(negativeLabels)))
-	h5_dump_dataset(negativeFeatureList, 
-					negativeLabels, 
-					'./output/icon_featur.hdf5', 
-					'hard_negative', 
-					'a')
-
+	print('Running classifier for {} total {} errors {}'.format(args['label'], total_predict_cnt, error_predict_cnt))
+	if (args['hard'] == True):
+		h5_dump_dataset(negativeFeatureList, 
+						negativeLabels, 
+						conf['classifier'+str(classIdx)+'_hard'], 
+						'hard_negative', 
+						'w')
 main()

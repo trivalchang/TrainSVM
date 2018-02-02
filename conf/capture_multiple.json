@@ -12,11 +12,20 @@
 	"transform_sqrt": 1,
 	"normalize": "L2",
 
+    /* hard negative dataset */
+    "classifier0_hard": "output/class0_hard.hdf5",
+    "classifier1_hard": "output/class1_hard.hdf5",
+    "classifier2_hard": "output/class2_hard.hdf5",
+    "classifier3_hard": "output/class3_hard.hdf5",
+    "classifier4_hard": "output/class4_hard.hdf5",
+    
 	/* SVC parameters */
-	"classifier0_path": "output/model0_OSD_icon.cpickle",
-	"classifier1_path": "output/model1_OSD_icon.cpickle",
-	"classifier2_path": "output/model2_OSD_icon.cpickle",
-	"classifier3_path": "output/model3_OSD_icon.cpickle",
-	"classifier4_path": "output/model4_OSD_icon.cpickle",
+	"positive_sample": 1500,
+	"negative_sample": 1500,
+	"classifier0_path": "output/hard/model0_OSD_icon.cpickle",
+	"classifier1_path": "output/hard/model1_OSD_icon.cpickle",
+	"classifier2_path": "output/hard/model2_OSD_icon.cpickle",
+	"classifier3_path": "output/hard/model3_OSD_icon.cpickle",
+	"classifier4_path": "output/hard/model4_OSD_icon.cpickle",
 	"C": 0.01
 }

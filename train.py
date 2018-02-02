@@ -10,10 +10,10 @@ import random
 from sklearn.svm import SVC
 import pickle
 
-sys.path.insert(0, '/Users/developer/guru/')
+sys.path.insert(0, '/home/andy_chang/test_proj/TrainSVM')
 
-from utility import basics
-from fileOp.imgReader import ImageReader
+#from utility import basics
+#from fileOp.imgReader import ImageReader
 from fileOp.conf import Conf
 from annotation.pascal_voc import pacasl_voc_reader
 from feature.HOG import HOG
@@ -46,7 +46,9 @@ def main():
 
 	hog = HOG(orientation, pixels_per_cell, cells_per_block, transform_sqrt, normalize)
 	(featureList, labels) = h5_load_dataset(args['path'], args['dataset'])
+	print('total {} normal features'.format(len(labels)))
 	(hard_featureList, hard_labels) = h5_load_dataset(args['path'], 'hard_negative')
+	print('hard negative {} normal features'.format(len(hard_labels)))
 	featureList = np.vstack([featureList, hard_featureList])
 	labels = np.hstack([labels, hard_labels])
 
