@@ -47,14 +47,16 @@ def main():
 	hog = HOG(orientation, pixels_per_cell, cells_per_block, transform_sqrt, normalize)
 	(featureList, labels) = h5_load_dataset(args['path'], args['dataset'])
 	(hard_featureList, hard_labels) = h5_load_dataset(args['path'], 'hard_negative')
-	featureList = np.vstack([featureList, hard_featureList])
-	labels = np.hstack([labels, hard_labels])
 
-	model = SVC(kernel="linear", C=conf["C"], probability=True, random_state=42)
-	model.fit(featureList, labels)
+	for classIdx in range(0, len(classInfo)):
+		idx = np.where(np.asarray(labels)==classIdx)
+		labelByClass = np.take(labels, idx)
+		featureByClass = np.take(featureList, idx)
+		model = SVC(kernel="linear", C=conf["C"], probability=True, random_state=42)
+		model.fit(featureList, labels)
 
-	f = open(conf["classifier_path"], "wb")
-	f.write(pickle.dumps(model))
-	f.close()
+		f = open(conf['classifier'+str(classIfx)+'_path'], "wb")
+		f.write(pickle.dumps(model))
+		f.close()
 
 main()

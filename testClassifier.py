@@ -17,6 +17,7 @@ from fileOp.imgReader import ImageReader
 from fileOp.conf import Conf
 from annotation.pascal_voc import pacasl_voc_reader
 from feature.HOG import HOG
+from fileOp.h5_dataset import h5_dump_dataset
 
 classInfo = []
 
@@ -50,6 +51,9 @@ def main():
 			continue
 		fileList.append(args['test']+'/'+f)
 
+	negativeFeatureList = []
+	negativeLabels = []
+	error_predict_cnt = 0
 	for xmlName in fileList:
 		voc = pacasl_voc_reader(xmlName)
 
@@ -68,5 +72,19 @@ def main():
 			#print('predict = {}, real = {}'.format(idx, realIdx))
 			if realIdx != predictIdx:
 				print('		predict error: {} - {}, real {} predict {}'.format(imgName, (xmin, ymin, xmax, ymax), realIdx, predictIdx))
+				error_predict_cnt = error_predict_cnt + 1
+				if realIdx == -1:
+					negativeFeatureList.append(feature)
+					negativeLabels.append(-1)
+					print('			write hard negative')
+
+	print('===========================')
+	print('{} errors '.format(error_predict_cnt))
+	print('write {} hard negative feature'.format(len(negativeLabels)))
+	h5_dump_dataset(negativeFeatureList, 
+					negativeLabels, 
+					'./output/icon_featur.hdf5', 
+					'hard_negative', 
+					'a')
 
 main()
