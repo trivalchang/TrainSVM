@@ -22,10 +22,10 @@
 	/* SVC parameters */
 	"positive_sample": 1500,
 	"negative_sample": 1500,
-	"classifier0_path": "output/hard/model0_OSD_icon.cpickle",
-	"classifier1_path": "output/hard/model1_OSD_icon.cpickle",
-	"classifier2_path": "output/hard/model2_OSD_icon.cpickle",
-	"classifier3_path": "output/hard/model3_OSD_icon.cpickle",
-	"classifier4_path": "output/hard/model4_OSD_icon.cpickle",
+	"classifier0_path": "MOD_Output/hard/model0_OSD_icon.cpickle",
+	"classifier1_path": "MOD_Output/hard/model1_OSD_icon.cpickle",
+	"classifier2_path": "MOD_Output/hard/model2_OSD_icon.cpickle",
+	"classifier3_path": "MOD_Output/hard/model3_OSD_icon.cpickle",
+	"classifier4_path": "MOD_Output/hard/model4_OSD_icon.cpickle",
 	"C": 0.01
 }

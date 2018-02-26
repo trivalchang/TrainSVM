@@ -10,8 +10,8 @@ import random
 from sklearn.svm import SVC
 import pickle
 
-sys.path.insert(0, '/home/andy_chang/test_proj/TrainSVM')
-
+#sys.path.insert(0, '/home/andy_chang/test_proj/TrainSVM')
+sys.path.append('/Users/developer/guru/utility')
 #from utility import basics
 #from fileOp.imgReader import ImageReader
 from fileOp.conf import Conf
@@ -44,13 +44,13 @@ def main():
 	transform_sqrt = True if conf['transform_sqrt']==1 else False
 	normalize = str(conf['normalize'])
 
-	hog = HOG(orientation, pixels_per_cell, cells_per_block, transform_sqrt, normalize)
+	#hog = HOG(orientation, pixels_per_cell, cells_per_block, transform_sqrt, normalize)
 	(featureList, labels) = h5_load_dataset(args['path'], args['dataset'])
 	print('total {} normal features'.format(len(labels)))
-	(hard_featureList, hard_labels) = h5_load_dataset(args['path'], 'hard_negative')
-	print('hard negative {} normal features'.format(len(hard_labels)))
-	featureList = np.vstack([featureList, hard_featureList])
-	labels = np.hstack([labels, hard_labels])
+	#(hard_featureList, hard_labels) = h5_load_dataset(args['path'], 'hard_negative')
+	#print('hard negative {} normal features'.format(len(hard_labels)))
+	#featureList = np.vstack([featureList, hard_featureList])
+	#labels = np.hstack([labels, hard_labels])
 
 	model = SVC(kernel="linear", C=conf["C"], probability=True, random_state=42)
 	model.fit(featureList, labels)

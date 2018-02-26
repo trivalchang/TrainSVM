@@ -10,8 +10,7 @@ import random
 from sklearn.svm import SVC
 import pickle
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(os.path.dirname(os.path.abspath(__file__))+'/utility')
+sys.path.append('/Users/developer/guru/utility')
 
 #from utility import basics
 #from fileOp.imgReader import ImageReader
@@ -47,7 +46,9 @@ def main():
 	hog = HOG(orientation, pixels_per_cell, cells_per_block, transform_sqrt, normalize)
 
 	classIdx = classInfo.index(args['label'])
+	print('loading {}...'.format(conf['classifier'+str(classIdx)+'_path']))
 	model = pickle.loads(open(conf['classifier'+str(classIdx)+'_path'], "rb").read())
+	print('loading done')
 
 	fileList = []
 	for f in os.listdir(args['test']):
@@ -59,6 +60,7 @@ def main():
 	negativeLabels = []
 	error_predict_cnt = 0
 	total_predict_cnt = 0
+	e1 = cv2.getTickCount()
 	for xmlName in fileList:
 		voc = pacasl_voc_reader(xmlName)
 
@@ -78,15 +80,18 @@ def main():
 			
 			#print('predict = {}, real = {}'.format(predictIdx, realIdx))
 			if realIdx != predictIdx:
-				#print('		predict error: {} - {}, real {} predict {}'.format(imgName, (xmin, ymin, xmax, ymax), realIdx, predictIdx))
+				print('		predict error: {} - {}, real {} predict {}'.format(imgName, (xmin, ymin, xmax, ymax), realIdx, predictIdx))
 				error_predict_cnt = error_predict_cnt + 1
 				if realIdx == -1:
 					negativeFeatureList.append(feature)
 					negativeLabels.append(-1)
 			total_predict_cnt = total_predict_cnt + 1
-	
+	e2 = cv2.getTickCount()
+	time = (e2 - e1)/ cv2.getTickFrequency()
+	time = time * 1000
 	print('===========================')
 	print('Running classifier for {} total {} errors {}'.format(args['label'], total_predict_cnt, error_predict_cnt))
+	print('each predict takes {}'.format(time/total_predict_cnt))
 	if (args['hard'] == True):
 		h5_dump_dataset(negativeFeatureList, 
 						negativeLabels, 

@@ -26,8 +26,6 @@ def main():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-c", "--conf", required=True,  help="json file configuration")
 	ap.add_argument("-p", "--path", required=True, help="path of the dataset")
-	ap.add_argument("-o", "--output", required=True, help="path of the output feature file")
-	ap.add_argument("-d", "--dataset", required=True, help="name of the dataset")
 	ap.add_argument("-a", "--append", default=False, action='store_true', required=False, help="name of the dataset")
 
 	args = vars(ap.parse_args())
@@ -57,6 +55,7 @@ def main():
 				continue
 			fileList.append(args['path']+'/'+f)
 
+	cnt = 0
 	for fpath in fileList:
 		print('file {}'.format(fpath))
 		if fpath.endswith(".xml") == False:
@@ -74,13 +73,15 @@ def main():
 				labels.append(classInfo.index(className))
 			(feature, _) = hog.describe(roi)
 			featureList.append(feature)
+			cnt = cnt + 1
+		if (cnt >= conf['sample_cnt']):
+			break
 
-		break
 	print('write {} feature'.format(len(labels)))
 	h5_dump_dataset(featureList, 
 						labels, 
-						'./output/icon_featur.hdf5', 
-						args['dataset'], 
+						conf['feature_file'], 
+						conf['dataset_feature_name'], 
 						'a' if args['append']==True else 'w')
 
 main()

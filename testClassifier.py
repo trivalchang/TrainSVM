@@ -10,8 +10,7 @@ import random
 from sklearn.svm import SVC
 import pickle
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(os.path.dirname(os.path.abspath(__file__))+'/utility')
+sys.path.append('/Users/developer/guru/utility')
 
 #from utility import basics
 #from fileOp.imgReader import ImageReader
@@ -27,7 +26,8 @@ def main():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-c", "--conf", required=True, help="json file configuration")
 	ap.add_argument("-t", "--test", required=True, help="path of the test image")
-
+	ap.add_argument("-n", "--hard", default=False, action='store_true', required=False, help="write hard negative")
+	
 	args = vars(ap.parse_args())
 
 	conf = Conf(args['conf'])
@@ -55,6 +55,8 @@ def main():
 	negativeFeatureList = []
 	negativeLabels = []
 	error_predict_cnt = 0
+	total_predict_cnt = 0
+	e1 = cv2.getTickCount()
 	for xmlName in fileList:
 		voc = pacasl_voc_reader(xmlName)
 
@@ -78,11 +80,17 @@ def main():
 					negativeFeatureList.append(feature)
 					negativeLabels.append(-1)
 					print('			write hard negative')
+			total_predict_cnt = total_predict_cnt + 1
 
+	e2 = cv2.getTickCount()
+	time = (e2 - e1)/ cv2.getTickFrequency()
+	time = time * 1000
 	print('===========================')
-	print('{} errors '.format(error_predict_cnt))
-	print('write {} hard negative feature'.format(len(negativeLabels)))
-	h5_dump_dataset(negativeFeatureList, 
+	print('total {} predicts, {} errors '.format(total_predict_cnt, error_predict_cnt))
+	print('each predict takes {}'.format(time/total_predict_cnt))
+	if (args['hard'] == True):
+		print('write {} hard negative feature'.format(len(negativeLabels)))
+		h5_dump_dataset(negativeFeatureList, 
 					negativeLabels, 
 					'./output/icon_featur.hdf5', 
 					'hard_negative', 
